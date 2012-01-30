@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+<title>Google Maps JavaScript API v3 Example: Geocoding Simple</title>
+<link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript">
+
+var geocoder
+var map
+var directionsDisplay
+var directionsService = new google.maps.DirectionsService()
+var markers = new Array()
+var business = new Array()
+
+business.push
+(
+     {
+         id          : '1',
+         name        : 'Roasters',
+         address     : '2770 Lenox Rd NE # 1-10, Atlanta, GA',
+         expiration  : '2/20/2012',
+         meters      : null,
+         distance    : null,
+         marker      : null
+     }
+)
+
+business.push
+(
+     {
+         id          : '2',
+         name        : 'Pilippopolis Tavern',
+         address     : '1995 Windy Hill Road, Atlanta, GA 30038',
+         expiration  : '2/05/2012',
+         meters      : null,
+         distance    : null,
+         marker      : null
+     }
+)
+
+function initialize()
+{
+
+    geocoder = new google.maps.Geocoder()
+    directionsDisplay = new google.maps.DirectionsRenderer()
+    var latlng = new google.maps.LatLng( -34.397, 150.644 )
+    var myOptions =
+    {
+      zoom: 11,
+      center: latlng,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+    map = new google.maps.Map( document.getElementById( "map_canvas" ), myOptions )
+    codeInitial()
+
+    var i = 0;
+    for ( i = 0; i < business.length; i++ )
+    {
+        codeBusiness( business[ i ].address, business[ i ].name, i )
+    }
+    directionsDisplay.setMap( map )
+
+    sideBar()
+}
+
+function sideBar()
+{
+
+    if( business[ business.length - 1 ].meters === null)
+    {
+        var dist = "N"
+    }
+    else
+    {
+        var dist = "Y"
+    }
+
+    $.get("makesidebar5.php", { q: business.length, d: dist }, function(responseText)
+    {
+        if( business[ business.length - 1 ].distance === null)
+        {
+            document.getElementById("tblSidebar").innerHTML = responseText;
+            for ( i = 0; i < business.length; i++ )
+            {
+                document.getElementById("name" + i).innerHTML= business[i].name;
+                document.getElementById("address" + i).innerHTML= business[i].address;
+                document.getElementById("expires" + i).innerHTML= business[i].expiration;
+
+                attachMarkerToDiv( i )
+            }
+        }
+        else
+        {
+            document.getElementById("tblSidebar").innerHTML = responseText;
+            for ( i = 0; i < business.length; i++ )
+            {
+                document.getElementById("name" + i).innerHTML= business[i].name;
+                document.getElementById("address" + i).innerHTML= business[i].address;
+                document.getElementById("expires" + i).innerHTML= business[i].expiration;
+                document.getElementById("distance" + i).innerHTML= business[i].distance;
+
+                attachMarkerToDiv( i )
+            }
+        }
+    })
+
+}
+
+function attachMarkerToDiv( i )
+{
+    $("div.biz" + i).mouseenter(function()
+    {
+        growMarker( i );
+        $(this).css("backgroundColor", "#F0F5FF")
+    }).mouseleave(function()
+    {
+        shrinkMarker( i )
+        $(this).css("backgroundColor", "#FFFFFF")
+    })
+}
+
+function codeInitial()
+{
+    var address = document.getElementById( "address" ).value
+    geocoder.geocode( { 'address' : address}, function( results, status )
+    {
+        if( status == google.maps.GeocoderStatus.OK )
+        {
+            map.setCenter( results[ 0 ].geometry.location )
+        } else {
+            alert( "Geocode was not successful for the following reason: " + status )
+        }
+    });
+}
+
+
+function codeAddress()
+{
+    var address = document.getElementById( "address" ).value
+    geocoder.geocode( { 'address' : address }, function( results, status )
+    {
+        if ( status == google.maps.GeocoderStatus.OK )
+        {
+            map.setCenter( results[ 0 ].geometry.location )
+
+            var marker = new google.maps.Marker
+            (
+                {
+                    map      : map,
+                    position : results[ 0 ].geometry.location
+                }
+            )
+
+            var i = 0
+            for( i = 0; i < business.length; i++ )
+            {
+                calcRoute( business[ i ].address, i, business.length  - 1, function( meters, distance, iter, last )
+                {
+                    if( iter === last )
+                    {
+                        business[ iter ].meters = meters
+                        business[ iter ].distance = distance
+                        sortByNearby()
+                    }
+                    else
+                    {
+                        business[ iter ].meters = meters
+                        business[ iter ].distance = distance
+                    }
+                })
+                //console.log ( 'business', business )
+            }
+        } else {
+            alert("Geocode was not successful for the following reason: " + status);
+        }
+    });
+}
+
+
+function codeBusiness(bizAddress, bizName, i)
+{
+    geocoder.geocode( { 'address' : bizAddress }, function( results, status )
+    {
+        if ( status == google.maps.GeocoderStatus.OK )
+        {
+            business[ i ].marker = i
+
+            markers[ i ] = new google.maps.Marker
+            (
+                {
+                    map: map,
+                    position: results[0].geometry.location,
+                    title: bizName
+                }
+            )
+
+            markers[ i ].setIcon(new google.maps.MarkerImage
+            (
+                'http://chart.googleapis.com/chart?chst=d_map_pin_letter_withshadow&chld=A|E64848|000000',
+                null,
+                null,
+                new google.maps.Point(11, 34), // this is the proper anchor point
+                new google.maps.Size (40, 37)  // set standard size (exluding this does nothing)
+            ));
+
+            var contentString = '<div id="content">' +
+            '<div id="siteNotice">' + '</div>' +
+            '<h1 id="firstHeading" class="firstHeading">' + bizName + '</h1>' +
+            '<div id="bodyContent">' +
+            '<p>' + 'Hello' + '</p>' +
+            '</div>' + '</div>';
+
+            var infowindow = new google.maps.InfoWindow
+            (
+                {
+                    content : contentString
+                }
+            )
+
+            google.maps.event.addListener( markers[ i ], 'click', function()
+            {
+                infowindow.open( map, markers[ i ] )
+            })
+
+        }
+        else
+        {
+            alert("Geocode was not successful for the following reason: " + status);
+        }
+    })
+}
+
+
+function calcRoute( bizAddress, iter, last, callback )
+{
+//    console.log( 'bizAddress', bizAddress )
+//    console.log( 'iterator', iterator )
+//    console.log( 'business', business )
+    var start = document.getElementById( "address" ).value
+    var end = bizAddress
+    var request =
+    {
+        origin      : start,
+        destination : end,
+        travelMode  : google.maps.DirectionsTravelMode.DRIVING
+    }
+    directionsService.route( request, function( response, status )
+    {
+        if ( status == google.maps.DirectionsStatus.OK )
+        {
+//          directionsDisplay.setDirections(response);
+//          console.log("distance calc: " + response.routes[0].legs[0].distance.value);
+//          business[iterator].distance =  response.routes[0].legs[0].distance.value;
+            callback( response.routes[ 0 ].legs[ 0 ].distance.value, response.routes[ 0 ].legs[ 0 ].distance.text, iter, last )
+        }
+    })
+}
+
+function sortByNew()
+{
+    business.sort( function( a , b )
+    {
+        return a.id - b.id
+    })
+
+    sideBar()
+}
+
+function sortByExpiration()
+{
+    business.sort( function( a , b )
+    {
+        var dateA = new Date( a.expiration), dateB = new Date(b.expiration)
+        return dateA - dateB
+    })
+
+    sideBar()
+}
+
+function sortByNearby()
+{
+    business.sort( function( a , b )
+    {
+       return a.meters - b.meters
+    })
+    sideBar()
+}
+
+function growMarker( i )
+{
+    var Px      = new Array(1, 1, 2, 3);
+    var Py      = new Array(3, 4, 8, 10);
+    var Sx      = new Array(3, 6, 9, 12);
+    var Sy      = new Array(3, 5, 8, 11);
+    var SxMinus = new Array(40, 43, 46, 49);
+
+    var m = business[ i ].marker
+
+    if( markers[ m ].getIcon().scaledSize.width === 40)
+    {
+        for( i = 0; i < 4; i++ )
+        {
+            setTimeout
+            (
+                "if(markers[ " + m + " ].getIcon().scaledSize.width === " + SxMinus[ i ] + ")" +
+                "{" +
+                    "markers[ " + m + " ].setIcon(new google.maps.MarkerImage" +
+                    "(" +
+                        "'http://chart.googleapis.com/chart?chst=d_map_pin_letter_withshadow&chld=A|E64848|000000'," +
+                        "null,"+
+                        "null,"+
+                        "new google.maps.Point(11 + " + Px[ i ] + ", 34 + " + Py[ i ] + ")," +
+                        "new google.maps.Size (40 + " + Sx[ i ] + ", 37 + " + Sy[ i ] + ")" +
+                    "))" +
+                "}"
+                , 30*i
+            )
+        }
+    }
+}
+
+function shrinkMarker( i )
+{
+    var m = business[ i ].marker
+
+    markers[ m ].setIcon(new google.maps.MarkerImage
+    (
+        'http://chart.googleapis.com/chart?chst=d_map_pin_letter_withshadow&chld=A|E64848|000000',
+        null,
+        null,
+        new google.maps.Point(11, 34), // this is the proper anchor point
+        new google.maps.Size (40, 37)  // set standard size (40,37) (exluding this does nothing)
+    ));
+}
+
+
+</script>
+</head>
+<body onload="initialize()">
+    <div class="add" style="height:50px">
+        <input id="address" type="textbox" value="Atlanta">
+        <input type="button" value="Geocode" onclick="codeAddress()">
+    </div>
+    <div style="top:50px;height:100%">
+    <TABLE width="100%" height="100%">
+    <TR height="100%">
+    <TD width="200px" valign="top">
+        <button type="button" id = "new" onclick="sortByNew()">New</button>
+        <button type="button" id = "expiring" onclick="sortByExpiration()">Expiring</button>
+        <button type="button" id = "nearby" onclick="sortByNearby()">Nearby</button>
+        <table id="tblSidebar">
+        </table>
+    </TD>
+    <TD>
+    <div id="map_canvas" class="map" style="height:100%;width:100%;"></div>
+    </TD>
+    </TR>
+    </TABLE>
+    </div>
+
+<script>
+/*
+for( i = 0; i < business.length; i++)
+{
+    console.log('every i',i)
+    $( "div.biz" + i ).live(
+    {
+        mouseenter: function()
+        {
+            console.log('i inside', i)
+//          growMarker( i );
+            $(this).css("backgroundColor", "#F0F5FF")
+        },
+        mouseleave: function()
+        {
+//          shrinkMarker( i )
+            $(this).css("backgroundColor", "#FFFFFF")
+        }
+    });
+}
+*/
+
+/*
+ $("div.biz1").live("mouseenter",function()
+ {
+     growMarker( 1 );
+     $(this).css("backgroundColor", "#F0F5FF")
+ }).live("mouseleave",function()
+ {
+     shrinkMarker( 1 )
+     $(this).css("backgroundColor", "#FFFFFF")
+ });
+*/
+</script>
+
+</body>
+</html>
