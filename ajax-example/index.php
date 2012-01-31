@@ -5,7 +5,7 @@
         <title>AJAX example</title>
         <link href = "common/css/main.css" rel = "stylesheet" type = "text/css" />
 
-        <script type = "text/javascript" src = "common/js/jquery/jquery-1.7.1.min.js"></script>
+        <script type = "text/javascript" src = "../common/js/jquery/jquery-1.7.1.min.js"></script>
         <script type = "text/javascript" src = "common/js/navigation_bar.js"></script>
         <script type = "text/javascript" src = "js/index.js"></script>
         <script type = "text/javascript">

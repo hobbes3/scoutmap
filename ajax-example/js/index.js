@@ -27,7 +27,7 @@ function send_get_field_list()
 {
     console.info( 'send_get_field_list()' )
 
-    var url = '../ajax-example/common/ajax/get_field_list.php'
+    var url = '../common/ajax/get_field_list.php'
     var map = {
         table_name : 'tb_business'
     }
@@ -63,7 +63,7 @@ function send_get_business_list()
 {
     console.info( 'send_get_business_list()' )
 
-    var url = '../ajax-example/common/ajax/get_business_search_results.php'
+    var url = '../common/ajax/get_business_search_results.php'
     var map = {
         city : 'atlanta'
     }
