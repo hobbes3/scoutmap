@@ -32,12 +32,12 @@ TABLE_BIZ_NAME  = 'tb_business'
 
 parser = argparse.ArgumentParser( description = "Insert or update Scoutmob deals into the database." )
 
-parser.add_argument( '-v', '--verbose', action = 'store_true',             default = False    , help = "prints verbose output"                                                    )
-parser.add_argument( '-d', '--debug'  , action = 'store_true',             default = False    , help = "prints debug and verbose information"                                     )
-parser.add_argument( '-u', '--update' , action = 'store_true',             default = False    , help = "update rows before skipping (usually for the column 'claimed')"           )
-parser.add_argument( '-s', '--skip'   , action = 'store_true',             default = False    , help = "continue the program when a deal is found (skipped), otherwise exit"      )
-parser.add_argument( '-l', '--limit'  ,                        type = int, default = 1        , help = "limit by number of deals by the most recent (0 for all deals): default 1" )
-parser.add_argument( '-c', '--city'   ,                                    default = 'atlanta', help = "choose the city for the deals (must match Scoutmob URL): default atlanta" )
+parser.add_argument( '-v', '--verbose', action = 'store_true', default = False    , help = "prints verbose output"                                                    )
+parser.add_argument( '-d', '--debug'  , action = 'store_true', default = False    , help = "prints debug and verbose information"                                     )
+parser.add_argument( '-u', '--update' , action = 'store_true', default = False    , help = "update rows before skipping (usually for the column 'claimed')"           )
+parser.add_argument( '-s', '--skip'   , action = 'store_true', default = False    , help = "continue the program when a deal is found (skipped), otherwise exit"      )
+parser.add_argument( '-l', '--limit'  ,            type = int, default = 1        , help = "limit by number of deals by the most recent (0 for all deals): default 1" )
+parser.add_argument( '-c', '--city'   ,                        default = 'atlanta', help = "choose the city for the deals (must match Scoutmob URL): default atlanta" )
 
 parser.add_argument( '-t', '--truncate', action = 'store_true', default = False, help = "truncate both the biz and deal tables, then exit" )
 
@@ -88,11 +88,17 @@ except mdb.Error, e:
 if args.truncate:
     cur = con.cursor()
 
-    verbose_string( 'Truncating business table...' )
-    verbose_string( 'Truncating deal table...'     )
+    verbose_string( "Temporary dropping the foreign key constraint..." )
+    execute_sql( cur, "alter table " + TABLE_DEAL_NAME + " drop foreign key fk_business" )
 
+    verbose_string( "Truncating business table..." )
     execute_sql( cur, "truncate table " + TABLE_BIZ_NAME  )
+
+    verbose_string( "Truncating deal table..." )
     execute_sql( cur, "truncate table " + TABLE_DEAL_NAME )
+
+    verbose_string( "Recreating the foreign key constraint..." )
+    execute_sql( cur, "alter table " + TABLE_DEAL_NAME + " add constraint fk_business foreign key ( business ) references tb_business ( business ) on delete cascade" )
 
     debug_string( 'Done' )
 

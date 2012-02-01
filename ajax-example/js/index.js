@@ -58,7 +58,6 @@ function send_get_field_list()
     }
 }
 
-
 function send_get_business_list()
 {
     console.info( 'send_get_business_list()' )

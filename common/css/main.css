@@ -52,3 +52,15 @@ body
     left         : 29.32em;
     z-index      : 29.32em;
 }
+
+#seach
+{
+    background-color : #F5F5F5;
+    margin           : 0 170px 0 0;
+    max-width        : 785px;
+    min-width        : 625px;
+    padding-bottom   : 20px;
+    padding-top      : 18px;
+    position         : relative;
+    z-index          : 4;
+}
