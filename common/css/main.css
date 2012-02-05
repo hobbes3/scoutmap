@@ -1,66 +1,32 @@
 html
 {
-    overflow    : hidden;
-    margin      : 0;
-    color       : #000000;
-    font-family : arial, sans-serif;
-    font-size   : 13px;
-    background  : none repeat scroll 0 0 #FFFFFF;
+    height : 100%;
 }
 
 body
 {
+    overflow    : hidden;
     height      : 100%;
     margin      : 0;
     padding     : 0;
-    font-family : sans-serif;
+    font-family : arial, sans-serif;
     direction   : ltr;
     text-align  : left;
     line-height : 18px;
 }
 
-#main
+#my_location
 {
-    margin  : 0;
-    padding : 0;
-}
-
-#header
-{
-    margin-top : 0;
-    position   : relative;
-    clear      : both;
-    overflow   : visible;
-    width      : 100%;
-    z-index    : 5;
-}
-
-#side
-{
-    left     : 0;
-    top      : 45px;
-    position : absolute;
-    z-index  : 3;
-    width    : 29.32em;
+    background-color : #fffff;
+    border-style     : solid;
+    border-width     : 2px;
+    cursor           : pointer;
+    text-align       : center;
 }
 
 #map
 {
-    border       : 1px solid rgba( 102, 102, 102, 0.25 );
-    margin-left  : 0;
-    margin-right : 29.32em;
-    left         : 29.32em;
-    z-index      : 29.32em;
+    width  : 100%;
+    height : 100%;
 }
 
-#seach
-{
-    background-color : #F5F5F5;
-    margin           : 0 170px 0 0;
-    max-width        : 785px;
-    min-width        : 625px;
-    padding-bottom   : 20px;
-    padding-top      : 18px;
-    position         : relative;
-    z-index          : 4;
-}

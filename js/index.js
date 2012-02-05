@@ -8,7 +8,6 @@ if( typeof console === 'undefined' )
     }
 }
 
-var MAP_DIV
 var MAP
 
 var MARKERS = new Array()
@@ -19,7 +18,8 @@ function initialize()
 {
     console.info( 'initialize()' )
 
-    MAP_DIV = document.getElementById( 'map' )
+    map_div         = document.getElementById( 'map'         )
+    my_location_div = document.getElementById( 'my_location' )
 
     var options =
     {
@@ -29,19 +29,9 @@ function initialize()
         mapTypeId : google.maps.MapTypeId.ROADMAP
     }
 
-    MAP = new google.maps.Map( MAP_DIV, options )
+    MAP = new google.maps.Map( map_div, options )
 
-    var dragStartCenter;
-
-    google.maps.event.addListener( MAP, 'dragstart', function() {
-        dragStartCenter = MAP.getCenter()
-    } )
-
-    google.maps.event.addListener( MAP, 'dragend', function() {
-        if( mapBounds.contains( MAP.getCenter() ) ) return
-        map.setCenter( MAP.dragStartCenter )
-    } )
-
+    google.maps.event.addDomListener( my_location_div, 'click', set_my_location() );
 
     send_get_business_list()
 }
@@ -118,19 +108,46 @@ function send_get_business_list()
         }
 
         var marker_cluster = new MarkerClusterer( MAP, MARKERS, options );
-
-        /*
-        var i = 0
-        var interval = setInterval( function() {
-            MARKERS[ i ].setMap( MAP )
-            i ++
-            if( i >= MARKERS.length ) clearInterval( interval )
-        }, 100 )
-        */
     }
 }
 
 function add_business_marker( business )
 {
 
+}
+
+function set_my_location()
+{
+    var my_location = new google.maps.Marker( {
+        clickable : true,
+        icon      : new google.maps.MarkerImage(
+                        '//maps.gstatic.com/mapfiles/mobile/mobileimgs2.png',
+                        new google.maps.Size( 22, 22 ),
+                        new google.maps.Point( 0, 18 ),
+                        new google.maps.Point( 11, 11 )
+                    ),
+        shadow    : null,
+        zIndex    : 999,
+        map       : MAP
+    } );
+
+    if( navigator.geolocation ) {
+        navigator.geolocation.getCurrentPosition( function( pos ) {
+            var latitude  = pos.coords.latitude
+            var longitude = pos.coords.longitude
+
+            console.log( 'latitude' , latitude  )
+            console.log( 'longitude', longitude )
+            var me = new google.maps.LatLng( latitude, longitude )
+            my_location.setPosition( me )
+
+            MAP.setCenter( me )
+            MAP.setZoom( 5 )
+        }, function( error ) {
+            alert( "Error getting your current location." )
+        } )
+    }
+    else {
+        alert( "Your browser doesn't support current location." )
+    }
 }
