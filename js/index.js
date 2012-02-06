@@ -33,11 +33,11 @@ function initialize()
 
     MAP = new google.maps.Map( map_div, options )
 
-    var homeControlDiv = document.createElement( 'div' );
-    var homeControl = new HomeControl( homeControlDiv, MAP );
+    var homeControlDiv = document.createElement( 'div' )
+    var homeControl = new HomeControl( homeControlDiv, MAP )
 
-    homeControlDiv.index = 1;
-    MAP.controls[ google.maps.ControlPosition.TOP_RIGHT ].push( homeControlDiv );
+    homeControlDiv.index = 1
+    MAP.controls[ google.maps.ControlPosition.TOP_RIGHT ].push( homeControlDiv )
 
     send_get_business_list()
 }
@@ -47,8 +47,9 @@ function send_get_business_list()
     console.info( 'send_get_business_list()' )
 
     var url = 'common/ajax/get_business_search_results.php'
+
     var options = {
-        //city : 'atlanta'
+        columns : [ 'business', 'latitude', 'longitude' ]
     }
 
     $.get( url, options, receive_get_business_list )
@@ -78,7 +79,7 @@ function send_get_business_list()
                 animation : google.maps.Animation.DROP
             } )
 
-            marker.id = i
+            marker.id = parseInt( business[ 'business' ] )
 
             var contentString
 
@@ -108,12 +109,35 @@ function send_get_business_list()
         }
 
         var options = {
-            averageCenter : true,
-            gridSize      : 30,
-            maxZoom       : 16
+            averageCenter  : true,
+            gridSize       : 40,
+            maxZoom        : 16,
+            imagePath      : 'common/images/m',
+            imageExtension : 'png'
         }
 
-        var marker_cluster = new MarkerClusterer( MAP, MARKERS, options );
+        var marker_cluster = new MarkerClusterer( MAP, MARKERS, options )
+
+        marker_cluster.setCalculator
+        (
+            function( markers, numStyles ) {
+                var index = 0
+                var count = markers.length.toString()
+
+                if     ( count < 5  ) index = 1
+                else if( count < 20 ) index = 2
+                else if( count < 40 ) index = 3
+                else if( count < 80 ) index = 4
+                else                  index = 5
+
+                return {
+                    text  : count,
+                    index : index
+                }
+            }
+        )
+
+        console.log( marker_cluster.getCalculator() )
     }
 }
 
@@ -123,29 +147,28 @@ function add_business_marker( business )
 }
 
 function HomeControl(controlDiv, map) {
-    controlDiv.style.padding = '5px';
+    controlDiv.style.padding = '5px'
 
-    var controlUI = document.createElement( 'div' );
-    controlUI.style.backgroundColor = 'white';
-    controlUI.style.borderStyle = 'solid';
-    controlUI.style.borderWidth = '2px';
-    controlUI.style.cursor = 'pointer';
-    controlUI.style.textAlign = 'center';
-    controlUI.title = 'Click here to get your location.';
-    controlDiv.appendChild( controlUI );
+    var controlUI = document.createElement( 'div' )
+    controlUI.style.backgroundColor = 'white'
+    controlUI.style.borderStyle     = 'solid'
+    controlUI.style.borderWidth     = '2px'
+    controlUI.style.cursor          = 'pointer'
+    controlUI.style.textAlign       = 'center'
+    controlUI.title                 = 'Click here to get your location.'
+    controlDiv.appendChild( controlUI )
 
-    var controlText = document.createElement( 'div' );
-    controlText.style.fontFamily = 'arial, sans-serif';
-    controlText.style.fontSize = '12px';
-    controlText.style.paddingLeft = '4px';
-    controlText.style.paddingRight = '4px';
-    controlText.innerHTML = 'My Location';
-    controlUI.appendChild( controlText );
+    var controlText = document.createElement( 'div' )
+    controlText.style.fontFamily   = 'arial, sans-serif'
+    controlText.style.fontSize     = '12px'
+    controlText.style.paddingLeft  = '4px'
+    controlText.style.paddingRight = '4px'
+    controlText.innerHTML          = 'My Location'
+    controlUI.appendChild( controlText )
 
-    // Setup the click event listeners: simply set the map to Chicago.
     google.maps.event.addDomListener( controlUI, 'click', function() {
         set_my_location()
-    });
+    } )
 }
 
 function set_my_location()
@@ -161,14 +184,14 @@ function set_my_location()
             clickable : true,
             icon      : new google.maps.MarkerImage(
                             '//maps.gstatic.com/mapfiles/mobile/mobileimgs2.png',
-                            new google.maps.Size( 22, 22 ),
-                            new google.maps.Point( 0, 18 ),
+                            new google.maps.Size ( 22, 22 ),
+                            new google.maps.Point( 0 , 18 ),
                             new google.maps.Point( 11, 11 )
                         ),
             shadow    : null,
             zIndex    : 999,
             map       : MAP
-        } );
+        } )
     }
 
     if( navigator.geolocation ) {
@@ -178,7 +201,6 @@ function set_my_location()
 
             console.log( 'latitude' , latitude  )
             console.log( 'longitude', longitude )
-
             var me = new google.maps.LatLng( latitude, longitude )
             MY_LOCATION.setPosition( me )
 

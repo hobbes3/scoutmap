@@ -8,6 +8,7 @@ $neighborhood = null;
 $address      = null;
 $city         = null;
 $zip_code     = null;
+$columns      = null;
 
 if(
     isset( $_REQUEST[ 'business' ] ) &&
@@ -52,7 +53,14 @@ if(
     is_numeric( $_REQUEST[ 'zip_code' ] ) &&
     $_REQUEST[ 'zip_code' ] >= 0
 ) {
-    $zip_code = $_REQUEST[ 'zip_code'];
+    $zip_code = $_REQUEST[ 'zip_code' ];
+}
+
+if(
+    isset( $_REQUEST[ 'columns' ] ) &&
+    $_REQUEST[ 'columns' ] != ''
+) {
+    $columns = $_REQUEST[ 'columns' ];
 }
 
 $businesses = search_business(
@@ -62,6 +70,7 @@ $businesses = search_business(
     $address,
     $city,
     $zip_code,
+    $columns,
     $count
 );
 

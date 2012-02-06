@@ -24,9 +24,21 @@ function search_business(
     $address,
     $city,
     $zip_code,
+    $columns,
     &$count = -1
 ) {
-    $query = "select * from tb_business where true ";
+    fb( $columns, '$columns' );
+
+    $query = "select ";
+
+    if( is_null( $columns ) ) {
+        $query .= "*";
+    }
+    else {
+        $query .= db_escape( implode( ',', $columns ) );
+    }
+
+    $query .= " from tb_business where true ";
 
 	$business = db_prep_positive_int( $business );
 
