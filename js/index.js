@@ -49,15 +49,17 @@ function send_get_business_list()
     var url = 'common/ajax/get_business_search_results.php'
 
     var options = {
-        columns : [ 'business', 'latitude', 'longitude' ]
+        //city         : 'atlanta',
+        //neighborhood : 'buckhead',
+        columns      : [ 'business', 'latitude', 'longitude' ]
     }
 
     $.get( url, options, receive_get_business_list )
 
-    function receive_get_business_list( doc, textStatus )
+    function receive_get_business_list( doc, text_status )
     {
         console.info( 'receive_get_business_list()' )
-        //console.info( 'receive_get_business_list( doc = ', doc, ', textStatus = ', textStatus, ' )' )
+        //console.info( 'receive_get_business_list( doc = ', doc, ', text_status = ', text_status, ' )' )
 
         var marker_array = new Array()
 
@@ -81,29 +83,7 @@ function send_get_business_list()
 
             marker.id = parseInt( business[ 'business' ] )
 
-            var contentString
-
-            contentString  = "<div style = 'width : 300'>"
-            contentString += "<strong>" + business[ 'name' ] + "</strong><br />"
-            contentString += business[ 'address' ] + "<br />"
-            contentString += business[ 'city' ] + ", " + business[ 'state' ] + " " + business[ 'zip_code' ]
-            contentString += "</div>"
-
-            var info_window = new google.maps.InfoWindow( {
-                content : contentString
-            } )
-
-            marker.info_window = info_window
-
-            google.maps.event.addListener( marker, 'click', function() {
-                console.log( 'this', this )
-
-                // Make sure whatever clicked info window is always on top.
-                this.info_window.zIndex = INFO_WINDOW_Z
-                INFO_WINDOW_Z ++
-
-                this.info_window.open( MAP, this )
-            } )
+            google.maps.event.addListener( marker, 'click', open_close_info_window )
 
             MARKERS.push( marker )
         }
@@ -136,8 +116,88 @@ function send_get_business_list()
                 }
             }
         )
+    }
+}
 
-        console.log( marker_cluster.getCalculator() )
+function open_close_info_window()
+{
+    console.info( "open_close_info_window()" )
+
+    marker = this
+
+    if( marker.info_window )
+    {
+        if( marker.info_window.getMap() ) {
+            marker.info_window.close()
+        }
+        else {
+            marker.info_window.zIndex = INFO_WINDOW_Z
+            INFO_WINDOW_Z ++
+
+            marker.info_window.open( MAP, marker )
+        }
+
+        return
+    }
+
+    var business = marker.id
+
+    var url = 'common/ajax/get_business_search_results.php'
+
+    var options = {
+        business : business,
+        columns  : [ 'name', 'address', 'city', 'state', 'zip_code', 'phone', 'url' ]
+    }
+
+    $.get( url, options, receive_get_business )
+
+    function receive_get_business( doc, text_status )
+    {
+        console.info( 'receive_get_business()' )
+
+        business_doc = doc[ 0 ]
+
+        var url = 'common/ajax/get_deal_search_results.php'
+
+        var options = {
+            business : business,
+            columns  : [ 'url', 'expiration', 'percent_discount', 'claimed', 'fine_print' ]
+        }
+
+        $.get( url, options, receive_get_deal )
+
+        function receive_get_deal( doc, text_status )
+        {
+            console.info( 'receive_get_deal()' )
+
+            deal_doc = doc[ 0 ]
+
+            var content_string
+
+            content_string  = "<strong>" + deal_doc[ 'percent_discount' ] + "% off " + business_doc[ 'name' ] + "</strong><br />"
+            content_string += business_doc[ 'address' ] + "<br />"
+            content_string += business_doc[ 'city' ] + ", " + business_doc[ 'state' ] + " " + business_doc[ 'zip_code' ] + "<br />"
+            content_string += business_doc[ 'phone' ] + "<br />"
+            content_string += "<a href = '" + business_doc[ 'url' ] + "'>" + business_doc[ 'url' ] + "</a><br />"
+            content_string += "<br />"
+            content_string += "Expires on " + deal_doc[ 'expiration' ] + ".<br />"
+            content_string += deal_doc[ 'claimed' ] + " claimed.<br />"
+            content_string += "<br />"
+            content_string += deal_doc[ 'fine_print' ]
+
+            console.log( 'content_string', content_string )
+
+            var info_window = new google.maps.InfoWindow( {
+                content : content_string,
+                zIndex  : INFO_WINDOW_Z
+            } )
+
+            console.log( 'marker', marker )
+
+            marker.info_window = info_window
+
+            marker.info_window.open( MAP, marker )
+        }
     }
 }
 
@@ -180,14 +240,16 @@ function set_my_location()
     {
         console.log( 'MY_LOCATION is null' )
 
+        var marker_image = new google.maps.MarkerImage(
+            '//maps.gstatic.com/mapfiles/mobile/mobileimgs2.png',
+            new google.maps.Size ( 22, 22 ),
+            new google.maps.Point( 0 , 18 ),
+            new google.maps.Point( 11, 11 )
+        )
+
         MY_LOCATION = new google.maps.Marker( {
             clickable : true,
-            icon      : new google.maps.MarkerImage(
-                            '//maps.gstatic.com/mapfiles/mobile/mobileimgs2.png',
-                            new google.maps.Size ( 22, 22 ),
-                            new google.maps.Point( 0 , 18 ),
-                            new google.maps.Point( 11, 11 )
-                        ),
+            icon      : marker_image,
             shadow    : null,
             zIndex    : 999,
             map       : MAP

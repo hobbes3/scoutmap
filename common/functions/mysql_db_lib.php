@@ -111,52 +111,35 @@ function db_escape( $value )
 function db_prep_positive_real( $value, $zero_ok )
 {
     if(
-        !isset( $value ) ||
         is_null ($value ) ||
         !is_numeric( $value)  ||
         $value == ""
     ) {
-        $value = 'null';
+        return 'null';
     }
-    else {
-        if( $value < 0 ) {
-            $value = 'null';
-        }
-        else if( $value == 0 ) {
-            if( !$zero_ok ) {
-                $value = 'null';
-            }
-        }
+    if( $value < 0 ) {
+        return 'null';
+    }
+    if( $value == 0 && !$zero_ok ) {
+        return 'null';
     }
 
     return ( real ) $value;
 }
 
-function db_prep_positive_int( $to_prep, $zero_ok = false )
+function db_prep_positive_int( $value, $zero_ok = false )
 {
-    $value = ( int ) $to_prep;
-
-    if( !isset( $value ) ) {
+    if(
+        is_null( $value ) ||
+        !is_numeric( $value ) ||
+        $value == ""
+    ) {
         return 'null';
     }
-
-    if( is_null( $value ) ) {
-        return 'null';
-    }
-
-    if( $value === '' ) {
-        return 'null';
-    }
-
-    if( !is_numeric( $value ) ) {
-        return 'null';
-    }
-
     if( $value < 0 ) {
         return 'null';
     }
-
-    if( ( $value == 0 ) && ( !$zero_ok ) ) {
+    if( $value == 0 && !$zero_ok ) {
         return 'null';
     }
 
@@ -166,54 +149,61 @@ function db_prep_positive_int( $to_prep, $zero_ok = false )
 function db_prep_int( $value, $zero_ok = false )
 {
     if(
-        !isset( $value ) ||
         is_null( $value ) ||
-        !is_numeric( $value )
+        !is_numeric( $value ) ||
+        $value == ""
     ) {
-        $value = 'null';
+        return 'null';
     }
-    else {
-        if(
-            $value == 0 &&
-            !$zero_ok
-        ) {
-            $value = 'null';
-        }
+    if( $value == 0 && !$zero_ok ) {
+        return 'null';
     }
 
-    return $value;
+    return ( int ) $value;
+}
+
+
+function db_prep_real( $value, $zero_ok = false )
+{
+    if(
+        is_null ($value ) ||
+        !is_numeric( $value ) ||
+        $value == ""
+    ) {
+        return 'null';
+    }
+    if( $value == 0 && !$zerk_ok ) {
+        return 'null';
+    }
+
+    return ( real ) $value;
 }
 
 function db_prep_string( $value )
 {
     if(
-        !isset( $value ) ||
         is_null( $value ) ||
         preg_match( '/^\s+$/', $value ) ||
         $value == ''
     ) {
-        $value = 'null';
-    }
-    else {
-        $value = "'$value'";
+        return 'null';
     }
 
-    return $value;
+    return "'$value'";
 }
 
 function db_prep_boolean( $value, $null_allowed = true )
 {
     if(
-        !isset( $value ) ||
         is_null( $value ) ||
         $value == "" ||
         $value === -1
     ) {
         if( $null_allowed ) {
-            $value = 'null';
+            return 'null';
         }
         else {
-            $value = 'false';
+            return 'false';
         }
     }
     else {
@@ -222,10 +212,10 @@ function db_prep_boolean( $value, $null_allowed = true )
             $value == 't' ||
             $value == 'true'
         ) {
-            $value = 'true';
+            return 'true';
         }
         else {
-            $value = 'false';
+            return 'false';
         }
     }
 
