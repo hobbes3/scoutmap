@@ -111,6 +111,7 @@ function search_business(
 function search_deal(
     $deal,
     $url,
+    $image_url,
     $business,
     $expiration,
     $percent_discount,
@@ -140,6 +141,7 @@ function search_deal(
     $claimed          = db_prep_positive_int( $claimed          );
 
     $url        = db_prep_string( db_escape( $url        ) );
+    $image_url  = db_prep_string( db_escape( $image_url  ) );
     $expiration = db_prep_string( db_escape( $expiration ) );
     $one_per    = db_prep_string( db_escape( $one_per    ) );
     $city       = db_prep_string( db_escape( $city       ) );
@@ -152,6 +154,9 @@ function search_deal(
     }
     if( strcmp( $url, 'null' ) ) {
         $query .= "and url = $url ";
+    }
+    if( strcmp( $image_url, 'null' ) ) {
+        $query .= "and image_url = $image_url ";
     }
     if( strcmp( $business, 'null' ) ) {
         $query .= "and business = $business ";

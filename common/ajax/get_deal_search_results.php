@@ -4,6 +4,7 @@ require_once( '../functions/db_lib.php' );
 
 $deal             = null;
 $url              = null;
+$image_url        = null;
 $business         = null;
 $expiration       = null;
 $percent_discount = null;
@@ -28,6 +29,13 @@ if(
     $_REQUEST[ 'url' ] != ''
 ) {
     $url = $_REQUEST[ 'url' ];
+}
+
+if(
+    isset( $_REQUEST[ 'iamge_url' ] ) &&
+    $_REQUEST[ 'iamge_url' ] != ''
+) {
+    $iamge_url = $_REQUEST[ 'iamge_url' ];
 }
 
 if(
@@ -104,6 +112,7 @@ if(
 $deals = search_deal(
     $deal,
     $url,
+    $image_url,
     $business,
     $expiration,
     $percent_discount,
