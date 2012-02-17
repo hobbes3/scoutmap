@@ -92,16 +92,16 @@ def get_deals_by_city( city ):
     # The page was actually not found and the Scoutmob redirected to the homepage with the worldmap.
     # Some city has a past deals page but there are actually no deals.
     if soup.find( 'div', { 'class' : 'worldmap_container' } ) != None:
-        print "Error: Could not open the page for " + city
+        verbose_string( "Error: Could not open the page for " + city )
         return 0
     if soup.find( 'div', { 'class' : 'past_deal' } ) == None:
-        print "Error: No deals in " + city
+        verbose_string( "Error: No deals in " + city )
         return 0
 
     # Some "fancy" string formatting for the banner.
     title = soup.html.head.title.string
     banner_length = len( title ) + 2
-    format_str = "{:=^" + str( banner_length ) + "}"
+    format_str = "{0:=^" + str( banner_length ) + "}"
 
     verbose_string( format_str.format( "" ) )
     verbose_string( format_str.format( title ) )
@@ -255,13 +255,13 @@ def get_deals_by_city( city ):
 
         # The business exist and...
         if count:
-            verbose_string( '{:03}'.format( i ) + ": Found business " + biz_info[ 'name' ] )
+            verbose_string( '{0:03}'.format( i ) + ": Found business " + biz_info[ 'name' ] )
 
             biz_info[ 'business' ] = row[ 0 ][ 'business' ]
 
             # ...update.
             if args.update:
-                verbose_string( '{:03}'.format( i ) + ": Update (-u) on: Updating business info..." )
+                verbose_string( '{0:03}'.format( i ) + ": Update (-u) on: Updating business info..." )
 
                 debug_string( '\nbiz_info =' )
                 debug_string( biz_info, True )
@@ -285,7 +285,7 @@ def get_deals_by_city( city ):
             deal_info[ 'business' ] = biz_info[ 'business' ]
         # The business doesn't exist so add the new business.
         else:
-            verbose_string( '{:03}'.format( i ) + ": Adding new business " + biz_info[ 'name' ] + "..." )
+            verbose_string( '{0:03}'.format( i ) + ": Adding new business " + biz_info[ 'name' ] + "..." )
 
             execute_sql( cur, "insert into " + TABLE_BIZ_NAME + """ values (
                                NULL,
@@ -316,11 +316,11 @@ def get_deals_by_city( city ):
 
         # The deal already exist and...
         if count:
-            verbose_string( '{:03}'.format( i ) + ": Found deal " + deal_info[ 'url' ] )
+            verbose_string( '{0:03}'.format( i ) + ": Found deal " + deal_info[ 'url' ] )
 
             # ...update.
             if args.update:
-                verbose_string( '{:03}'.format( i ) + ": Update (-u) on: Updating deal info..." )
+                verbose_string( '{0:03}'.format( i ) + ": Update (-u) on: Updating deal info..." )
 
                 # Note that url and business columns don't update.
                 execute_sql( cur, "update " + TABLE_DEAL_NAME + """ set
@@ -337,9 +337,9 @@ def get_deals_by_city( city ):
 
             # ...don't update (skip).
             if args.skip:
-                verbose_string( '{:03}'.format( i ) + ": Skip (-s) on: Moving on..." )
+                verbose_string( '{0:03}'.format( i ) + ": Skip (-s) on: Moving on..." )
             else:
-                verbose_string( '{:03}'.format( i ) + ": Skip (-s) off: Stopping..." )
+                verbose_string( '{0:03}'.format( i ) + ": Skip (-s) off: Stopping..." )
                 con.commit()
                 break
 
@@ -347,7 +347,7 @@ def get_deals_by_city( city ):
         else:
             debug_string( "deal_info[ 'business' ] = " + str( deal_info[ 'business' ] ) )
 
-            verbose_string( '{:03}'.format( i ) + ": Adding new deal " + deal_info[ 'url' ] + "..." )
+            verbose_string( '{0:03}'.format( i ) + ": Adding new deal " + deal_info[ 'url' ] + "..." )
 
             execute_sql( cur, "insert into " + TABLE_DEAL_NAME + """ values (
                                NULL,
@@ -437,7 +437,7 @@ total_time = time.time() - START_TIME
 verbose_string( "" )
 
 if deal_count != 0:
-    verbose_string( '{:<23}'.format( "Average time per deal: " ) + '{:1.6f}'.format( total_time / deal_count ) + " sec" )
-    verbose_string( '{:<23}'.format( "Total time: "            ) + '{:1.6f}'.format( total_time              ) + " sec" )
+    verbose_string( '{0:<23}'.format( "Average time per deal: " ) + '{0:1.6f}'.format( total_time / deal_count ) + " sec" )
+    verbose_string( '{0:<23}'.format( "Total time: "            ) + '{0:1.6f}'.format( total_time              ) + " sec" )
 
 verbose_string( "Done" )
